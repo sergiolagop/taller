@@ -1,0 +1,114 @@
+/* resuelve conflicto grocery crud */
+
+.gc-container .btn {
+  white-space: inherit;
+  padding: 0.44rem 1.14rem;
+}
+
+.gc-container .btn-outline-dark {
+  background-color: transparent !important;
+  border: 1px solid #aaa !important;
+}
+
+.gc-container .btn-default.dropdown-toggle {
+  background-color: transparent !important;
+}
+
+.gc-container .settings-button-container {
+  margin-top: 5px !important;
+}
+
+.gc-container select.per_page {
+  display: block !important;
+}
+
+.gc-container [type='checkbox']:checked,
+.gc-container [type='checkbox']:not(:checked) {
+  position: inherit !important;
+  opacity: 1 !important;
+  pointer-events: all !important;
+}
+
+.gc-container table.table td,
+.gc-container table.table th {
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+}
+
+.gc-container .floatR .btn-primary {
+  width: 26px !important;
+}
+
+.gc-container .floatR .search-button {
+  white-space: inherit;
+  padding: 0.44rem 0.64rem;
+}
+
+.gc-container .floatR .search-button,
+.gc-container .floatR .search-button ::before,
+.gc-container .floatR .search-button ::after {
+  -webkit-box-sizing: content-box;
+  -moz-box-sizing: content-box;
+  box-sizing: content-box;
+}
+
+.gc-container .floatR .search-button-big {
+  width: 180px !important;
+  background-color: white !important;
+  color: #333 !important;
+}
+
+.gc-container .floatR .search-input {
+  margin-left: 4px;
+  margin-right: 4px;
+}
+
+.gc-container .floatR .clear-all-search {
+  margin-left: 4px;
+}
+
+.modal-with-checkbox [type='checkbox']:checked,
+.modal-with-checkbox [type='checkbox']:not(:checked) {
+  opacity: 0 !important;
+}
+
+/* resuelve conflicto grocery crud chosen with bootstrap */
+/* https://stackoverflow.com/questions/25983906/width-of-chosen-dropdowns-near-zero-when-starting-in-collapsed-bootstrap-accordi#answers-header */
+
+.chosen-container.chosen-container-single {
+  width: 100% !important; /* or any value that fits your needs */
+}
+
+.chosen-container.chosen-container-multi {
+  width: 100% !important; /* or any value that fits your needs */
+}
+
+/* CUSTOM STYLES */
+
+.gc-container .table-label {
+  /*font-weight: bold;
+  font-size: 1.2rem;*/
+  background-color: #CCC !important;
+  font-size: 1.2rem;
+  padding: 5px;
+  font-weight: bolder;
+}
+
+.switch label input[type='checkbox']:checked + .lever:after {
+  background-color: red;
+}
+
+.white-skin .btn-secondary {
+  background-color: #005AAA !important;
+}
+
+.white-skin .btn-info {
+  background-color: #005AAA !important;
+}
+
+.white-skin .cancel-button {
+  background-color: #CC0000 !important;  
+}
+.white-skin .btn-danger {
+  background-color: #CC0000 !important;  
+}

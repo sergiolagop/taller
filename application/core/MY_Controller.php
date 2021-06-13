@@ -1,0 +1,160 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class MY_Controller extends CI_Controller {
+
+	function __construct() {
+		parent::__construct();
+		$this->load->database();
+		$this->load->model('menu_model','menu');
+		// $this->load->library(array('ion_auth','form_validation','parser','grocery_CRUD','base'));
+		$this->load->helper(array('url','language'));
+		// $this->form_validation->set_error_delimiters($this->config->item('error_start_delimiter', 'ion_auth'), $this->config->item('error_end_delimiter', 'ion_auth'));
+		// $this->lang->load('auth');
+		$base_url = base_url() ."dashboard/";
+		defined("APP_URL") ? null : define("APP_URL", str_replace("/lib", "", $base_url));
+		defined("ASSETS_URL") ? null : define("ASSETS_URL", base_url() . "assets");
+	}
+	
+	public function _loadBase($extra_data=array()){
+		$data = array();
+		$user = $this->ion_auth->user()->row();
+		$user_data=$this->session->userdata;
+
+		// echo print_r($user_data,true);die;
+		if($user_data['id_empresas'] == 0)
+			$data['LOGO_HEADER'] = "";
+		else{
+			if($user_data['id_empresas'] > 0){
+				$logo = $this->menu_model->get_logo($user_data['id_empresas']);
+				$data['LOGO_HEADER'] = base_url() . "/assets/uploads/files/".$logo[0]['logo'];
+			}else
+				$data['LOGO_HEADER'] = "";
+		}
+		// $data['USERNAME'] = $user->first_name;
+		$data['ult_actividad'] = date("Y/m/d H:i:s");
+		$extra_data['CONTENT'] = (!isset($extra_data['CONTENT'])?'':$extra_data['CONTENT']);
+		$data['css_files'] = (!isset($extra_data['css_files'])?array():$extra_data['css_files']);
+		$data['js_files'] = (!isset($extra_data['js_files'])?array():$extra_data['js_files']);
+		$data['js_script'] = (!isset($extra_data['js_script'])?'':$extra_data['js_script']);
+		$data['MENU'] = $this->getMenu();
+		$data['notificaciones'] = $this->getNotificaciones();
+		// echo print_r($data,true); die;
+		$htmlData = array(
+			'HEADER'    => $this->parser->parse('include/header', $data, TRUE), 
+			'CSS'   => $this->parser->parse('include/css', $data, TRUE), 
+			'SCRIPTS' => $this->parser->parse('include/scripts', $data, TRUE),
+			// 'GOOGLE_ANALYTICS'  => $this->parser->parse('include/google-analytics', $data, TRUE),
+			'FOOTER'    => $this->parser->parse('include/footer', $data, TRUE)
+		);
+		$arrayout = array_merge($htmlData,$extra_data);
+		$out = $this->parser->parse('include/base',$arrayout, TRUE);
+		$this->output->set_output($out);
+	}	
+	
+	function getMenu(){
+		$menus=$data = $this->menu->get_menus();
+		//echo "<pre>";
+		//print_r($menus);
+		//echo "</pre>";
+		
+		$menu_html_top='<li><ul class="collapsible collapsible-accordion">';
+		$menu_html='';
+		foreach ($menus as $km => $v) {
+			$cant_submenus=0;
+			foreach ($menus as $km2 => $v2) {
+				if ($v['id_modulo']==$v2['id_padre']) {
+					$cant_submenus++;
+				}
+			}
+			if ($cant_submenus>0) {
+				// Menús con submenus
+				$menu_html.='<li><a class="collapsible-header waves-effect arrow-r"><i class="'.$v['icon'].'" style="width:12px;"></i>'.$v['nombre_modulo'].'<i class="fas fa-angle-down rotate-icon"></i></a><div class="collapsible-body"><ul>';
+					foreach ($menus as $km3 => $v3) {
+						if ($v['id_modulo']==$v3['id_padre']) {
+							$menu_html.='<li><a href="'.base_url().$v3['controlador'].'/'.$v3['metodo'].'" class="waves-effect">'.$v3['nombre_modulo'].'</a></li>';
+						}
+					}
+              	$menu_html.='</ul></div></li>';
+			} else {
+				// Menús sin submenus
+				if ($v['id_padre']==0) {
+					$menu_html.='<li><a href="'.base_url().$v['controlador'].'/'.$v['metodo'].'" class="collapsible-header waves-effect"><i class="'.$v['icon'].'" style="width:12px;"></i>'.$v['nombre_modulo'].'</a></li>';
+				}
+			}
+		}
+        $menu_html_bottom='</ul></li>';
+        $menu_html=$menu_html_top.$menu_html.$menu_html_bottom;
+
+		return $menu_html;
+	}
+
+
+	function getNotificaciones(){
+		$user = $this->ion_auth->user()->row();
+		$user_data=$this->session->userdata;
+		$notif = $this->menu_model->getNotificacionesModel($user_data['user_id']);
+		// $notif = false;
+		// echo print_r($notif,true); die;
+		if($notif){
+			$tmp = array();
+			foreach ($notif as $key => $value) {
+				$value['dias'] = $this->secondsToWords($value['dias']);
+				$tmp[] = $value;
+				if(count($tmp) == 10)
+					break 1;
+			}
+			$out = array(array(
+					"notificaciones_det" => $tmp,
+					"notif_number" => count($notif)
+				));	
+		}else{
+			$out = array();
+		}
+		// echo print_r($notif,true); die;
+		return $out;
+	}
+
+
+	function _getUsergroups($user=null){
+		$user = $this->ion_auth->user()->row();
+		$user_groups = $this->ion_auth->get_users_groups($user->id)->result();
+		foreach ($user_groups as $value) {
+			$groups_id[] = $value->id;    
+		} 
+		return $groups_id;
+	}
+
+	function secondsToWords($seconds)
+	{
+	    $ret = "";
+
+	    /*** get the days ***/
+	    $days = intval(intval($seconds) / (3600*24));
+	    if($days> 0)
+	    {
+	        $ret .= "$days días ";
+	    }
+
+	    /*** get the hours ***/
+	    $hours = (intval($seconds) / 3600) % 24;
+	    if($hours > 0)
+	    {
+	        $ret .= "$hours"."h ";
+	    }
+
+	    /*** get the minutes ***/
+	    $minutes = (intval($seconds) / 60) % 60;
+	    if($minutes > 0)
+	    {
+	        $ret .= "$minutes"."m";
+	    }
+
+	    /*** get the seconds ***/
+	    $seconds = intval($seconds) % 60;
+	    if ($seconds > 0) {
+	        // $ret .= ":$seconds";
+	    }
+
+	    return $ret;
+	}
+}
